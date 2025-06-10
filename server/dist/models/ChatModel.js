@@ -44,5 +44,5 @@ const chatModel = new mongoose_1.Schema({
     },
     groupAdmin: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "User" },
 }, { timestamps: true });
-const Chat = (mongoose_1.models === null || mongoose_1.models === void 0 ? void 0 : mongoose_1.models.Chat) || (0, mongoose_1.model)("Char", chatModel);
+const Chat = (mongoose_1.models === null || mongoose_1.models === void 0 ? void 0 : mongoose_1.models.Chat) || (0, mongoose_1.model)("Chat", chatModel);
 exports.default = Chat;

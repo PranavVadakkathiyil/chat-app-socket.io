@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import toast from 'react-hot-toast'
 import {
     Card,
     CardContent,
@@ -7,22 +8,89 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-
+import { Loader2 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
+import { loginUser, registerUser } from "@/apis/Authapi"
 export function LoginForm({
     className,
     ...props
 }: React.ComponentPropsWithoutRef<"div">) {
     const [Login, setLogin] = useState(true)
     const [showpassword, setshowpassword] = useState(true)
+    const [onLoading, setLoading] = useState(false)
 
     const [name, setname] = useState("")
     const [email, setemail] = useState("")
     const [password, setpassword] = useState("")
     const [pic, setpic] = useState<File | null>(null)
     console.log(name, email, password, pic);
+    const successmsg = (msg: string) => { toast.success(msg, { icon: '👏', style: { backgroundColor: "black", color: "white" } }) };
+    const errmsg = (msg:string) => {
+        toast.success(msg, { icon: '🔥', style: { backgroundColor: "#d00000", color: "white" } });
+
+
+    }
+    const navigate = useNavigate()
+    const Formdata = new FormData()
+
+    Formdata.append("name", name);
+    Formdata.append("email", email);
+    Formdata.append("password", password);
+    if (pic) Formdata.append("avatar", pic);
+
+    const handleAuth = async (e: React.FormEvent) => {
+          e.preventDefault();
+
+        setLoading(true);
+        
+
+        try {
+               
+            if (Login) {
+                const res = await loginUser({ email, password })
+                if(res.data.success){
+                successmsg(res.data.message)
+                localStorage.setItem("token",res.data.token)
+                navigate('/Home')
+                
+                }
+                else{
+                    errmsg(res.data.message)
+                }
+                console.log(res);
+
+
+
+            }
+            else {
+                const res = await registerUser(Formdata)
+                if(res.data.success){
+                    successmsg(res.data.message)
+                    localStorage.setItem("token",res.data.token)
+                navigate('/Home')
+                
+                }
+                else{
+                    errmsg(res.data.message)
+                }
+                
+            }
+        } catch (error) {
+            console.error("Frontend Error:", error);
+            toast.error("Something went wrong");
+        }
+        finally{
+            setLoading(false);
+        }
+    }
+
+
+
+
+
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -34,7 +102,7 @@ export function LoginForm({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form>
+                    <form onSubmit={handleAuth}>
                         <div className="grid gap-6">
                             <div className="flex flex-col gap-4">
 
@@ -58,6 +126,7 @@ export function LoginForm({
                                 {!Login && (<div className="grid gap-2">
                                     <Label htmlFor="email">Name</Label>
                                     <Input
+                                    value={name}
                                         id="name"
                                         type="name"
                                         placeholder="Enter Name"
@@ -69,6 +138,7 @@ export function LoginForm({
                                 <div className="grid gap-2">
                                     <Label htmlFor="email">Email</Label>
                                     <Input
+                                    value={email}
                                         id="email"
                                         type="email"
                                         placeholder="m@example.com"
@@ -80,21 +150,21 @@ export function LoginForm({
                                     <div className="flex items-center">
                                         <Label htmlFor="password">Password</Label>
                                         <a
-                                            href="#"
-                                            className="ml-auto text-sm underline-offset-4 hover:underline"
+                                            
+                                            className="ml-auto text-sm underline-offset-4 hover:underline cursor-pointer"
                                         >
                                             Forgot your password?
                                         </a>
                                     </div>
-                                    <Input id="password" type={showpassword ?   "number" : "password"} required onChange={(e) => setpassword(e.target.value)} />
+                                    <Input id="password" value={password} type={showpassword ? "text" : "password"} required onChange={(e) => setpassword(e.target.value)} />
                                     <div>
                                         <a
-                                            href="#"
-                                            className="ml-auto text-sm underline-offset-4 hover:underline"
-                                            onClick={()=>setshowpassword(!showpassword)}
+                                            
+                                            className="ml-auto text-sm underline-offset-4 hover:underline cursor-pointer"
+                                            onClick={() => setshowpassword(!showpassword)}
                                         >
-                                            {!showpassword ?   "View password? " : "Close password? "}
-                                             
+                                            {!showpassword ? "View password? " : "Close password? "}
+
                                         </a>
                                     </div>
 
@@ -113,12 +183,14 @@ export function LoginForm({
                             </div>
                             <div className="text-center text-sm">
                                 {Login && ("Don't")}  have an account?{" "}
-                                <a href="#" onClick={() => setLogin(!Login)} className="underline underline-offset-4">
+                                <a  onClick={() => setLogin(!Login)} className="underline underline-offset-4 cursor-pointer">
                                     {!Login ? ("Login") : (" Sign up")}
                                 </a>
                             </div>
-                            <Button type="submit" className="w-full">
-                                {Login ? ("Login") : (" Sign up")}
+                            <Button disabled={onLoading} type="submit" className="w-full"  >
+                                {onLoading ? (<Loader2 className="animate-spin" />) : (
+                                    Login ? ("Login") : (" Sign up")
+                                )}
                             </Button>
                         </div>
                     </form>

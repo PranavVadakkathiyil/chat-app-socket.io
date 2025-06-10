@@ -22,5 +22,5 @@ const chatModel  = new Schema<Ichat>(
   { timestamps: true }
 );
 
-const Chat = models?.Chat || model<Ichat>("Char",chatModel)
+const Chat = models?.Chat || model<Ichat>("Chat",chatModel)
 export default Chat

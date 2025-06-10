@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import { ChatState } from '@/context/chatProvider';
+import SideNav from '@/components/chats/SideNav';
+import { Box } from "@chakra-ui/react"
+import MyChats from '@/components/MyChats';
+import Chatbox from '@/components/Chatbox';
+
 type Chat = {
   _id: string;
   chatName: string;
@@ -8,6 +14,8 @@ type Chat = {
   groupAdmin?: { name: string; email: string };
 };
 const Home :React.FC= () => {
+  const {user} = ChatState()
+
     const [data, setdata] = useState<Chat[]>([])
 
     const getdata = async()=>{
@@ -21,19 +29,16 @@ const Home :React.FC= () => {
             
         }
     }
-    useEffect(() => {
-      getdata()
-    
-      
-    }, [])
     
   return (
-    <div>
-        {data.map((chat)=>(
-            <div key={chat._id}>
-                <p>{chat.chatName}</p>
-            </div>
-        ))}
+     <div style={{ width: "100%" }}>
+      {user && <SideNav />}
+      <Box d="flex" justifyContent="space-between" w="100%" h="91.5vh" p="10px">
+        {user && <MyChats  />}
+        {user && (
+          <Chatbox  />
+        )}
+      </Box>
     </div>
   )
 }
